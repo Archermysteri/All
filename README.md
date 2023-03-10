@@ -28,7 +28,7 @@ cd All_bot
 ```
 Download requirements.txt
 ```commandline
-pip install -m requirements.txt
+pip install -r requirements.txt
 ```
 Write down the token of the Bot's telegram
 ```commandline
