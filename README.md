@@ -36,7 +36,7 @@ echo "TOKEN=YOUR_TOKEN" > .env
 ```
 Run app
 ```commandline
-python main.py
+python3 main.py
 ```
 
 
