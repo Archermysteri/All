@@ -20,14 +20,15 @@ sudo apt-get update
 sudo apt-get install python3.10
 ```
 
-Download requirements.txt
-```commandline
-pip install -m requirements.txt
-```
+
 Download app
 ```commandline
 git clone https://github.com/Archermysteri/All_bot.git
 cd All_bot
+```
+Download requirements.txt
+```commandline
+pip install -m requirements.txt
 ```
 Write down the token of the Bot's telegram
 ```commandline
