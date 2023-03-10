@@ -37,10 +37,8 @@ class tiktok_downloader:
         post_url = server_url + "id/download"
         req_post = ses.post(post_url, data=data, allow_redirects=True)
         if req_post.status_code == 302 or 'This video is currently not available' in req_post.text or 'Video is private or removed!' in req_post.text or 'Video bersifat pribadi atau dihapus!' in req_post.text:
-            print('- video private or remove')
             return 'private/remove'
         elif 'Submitted Url is Invalid, Try Again' in req_post.text or 'TikTok mengembalikan halaman utama!' in req_post.text:
-            print('- url is invalid')
             return 'url-invalid'
         get_all_blank = bs4.BeautifulSoup(req_post.text, 'html.parser').findAll(
             'a', attrs={'target': '_blank'})
