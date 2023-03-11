@@ -7,7 +7,11 @@ class tiktok_downloader:
         pass
     def content(self, url):
         """
-        url: tiktok video url
+        This function returns the content of a TikTok video link
+
+        :param url: TikTok video url
+
+        :return video content or error
         """
         ses = requests.Session()
         server_url = 'https://musicaldown.com/'
