@@ -30,6 +30,12 @@ Download requirements.txt
 ```commandline
 pip install -r requirements.txt
 ```
+Download ffmpeg
+```commandline
+sudo apt update 
+sudo apt install ffmpeg
+```
+
 Write down the token of the Bot's telegram
 ```commandline
 echo "TOKEN=YOUR_TOKEN" > .env
