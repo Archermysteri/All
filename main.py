@@ -1,8 +1,11 @@
+from moviepy.video.io.VideoFileClip import VideoFileClip
+from moviepy.video.fx.all import crop
+from tiktok_module import downloader
 from dotenv import load_dotenv
+from telebot import types
 from colorama import Fore
 from io import BytesIO
 from PIL import Image
-from tiktok_module import downloader
 import audioread
 import datetime
 import requests
@@ -45,19 +48,19 @@ def logs(message: telebot.types.Message, level: int, log_mes: str, error: Except
 
     if level == 0:
         logging.debug(log_mes)
-        print(Fore.BLUE + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] DEBUG {log_mes}")
+        print(Fore.BLUE + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] DEBUG {log_mes}",error)
     elif level == 1:
         logging.info(log_mes)
-        print(Fore.GREEN + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] INFO {log_mes}")
+        print(Fore.GREEN + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] INFO {log_mes}",error)
     elif level == 2:
         logging.debug(log_mes)
-        print(Fore.YELLOW + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] WARNING {log_mes}")
+        print(Fore.YELLOW + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] WARNING {log_mes}",error)
     elif level == 3:
         logging.error(log_mes, exc_info=error)
-        print(Fore.RED + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ERROR {log_mes}")
+        print(Fore.RED + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ERROR {log_mes}",error)
     elif level == 4:
         logging.critical(log_mes)
-        print(Fore.RED + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] CRITICAL {log_mes}")
+        print(Fore.RED + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] CRITICAL {log_mes}",error)
 
 
 def get(videoid: str):
@@ -124,30 +127,51 @@ def download_and_send(url: str, message: telebot.types.Message):
         bot.send_message(chat_id, (song['trackName'] + " has not been successfully downloaded."))
         logs(message, 3, f"User {message.chat.id} error download song Youtube music url:{song['trackUrl']}", e)
         return False
+@bot.message_handler(content_types=["video"])
+def video_message(message):
+    logs(message, 1, f"User {message.chat.id} start function selection video message id {message.message_id}")
+    try:
+        input_path = f"tmp/{message.chat.id}.mp4"
+        output_path = f"tmp/output_{message.chat.id}.mp4"
+        raw = message.video.file_id
+        file_info = bot.get_file(raw)
+        video = bot.download_file(file_info.file_path)
+        with open(input_path, 'wb') as fd:
+            fd.write(video)
 
+        video = VideoFileClip(input_path, verbose=False)
+        width, height = video.size
+        new_size = min(width, height)
+        cropped_video = crop(video, width=new_size, height=new_size, x_center=width / 2, y_center=height / 2)
+        cropped_video.write_videofile(output_path, logger=None)
+        bot.send_video_note(message.chat.id, open(output_path,"rb"))
+        os.remove(output_path)
+        os.remove(input_path)
+    except Exception as e:
+        logs(message, 3, f"User {message.chat.id} error function selection video  message id {message.message_id}", e)
 
 @bot.message_handler(content_types=["audio"])
 def audio_message(message):
-    logs(message, 1, f"User {message.chat.id} start convert audio to voice")
+    logs(message, 1, f"User {message.chat.id} start convert audio to voice message id {message.message_id}")
     try:
         raw = message.audio.file_id
         file_info = bot.get_file(raw)
         audio = bot.download_file(file_info.file_path)
         bot.send_voice(message.chat.id, audio)
     except Exception as e:
-        logs(message, 3, f"User {message.chat.id} error convert audio to voice", e)
+        logs(message, 3, f"User {message.chat.id} error convert audio to voice message id {message.message_id}", e)
 
 
 @bot.message_handler(content_types=["voice"])
 def voice_message(message):
-    logs(message, 1, f"User {message.chat.id} start convert voice to audio")
+    logs(message, 1, f"User {message.chat.id} start convert voice to audio message id {message.message_id}")
     try:
         raw = message.voice.file_id
         file_info = bot.get_file(raw)
         audio = bot.download_file(file_info.file_path)
         bot.send_audio(message.chat.id, audio)
     except Exception as e:
-        logs(message, 3, f"User {message.chat.id} error convert voice to audio", e)
+        logs(message, 3, f"User {message.chat.id} error convert voice to audio message id {message.message_id}", e)
 
 
 @bot.message_handler(content_types=["text"])
