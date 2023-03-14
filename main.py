@@ -162,16 +162,6 @@ def audio_message(message):
         logs(message, 3, f"User {message.chat.id} error convert audio to voice message id {message.message_id}", e)
 
 
-@bot.message_handler(content_types=["voice"])
-def voice_message(message):
-    logs(message, 1, f"User {message.chat.id} start convert voice to audio message id {message.message_id}")
-    try:
-        raw = message.voice.file_id
-        file_info = bot.get_file(raw)
-        audio = bot.download_file(file_info.file_path)
-        bot.send_audio(message.chat.id, audio)
-    except Exception as e:
-        logs(message, 3, f"User {message.chat.id} error convert voice to audio message id {message.message_id}", e)
 
 
 @bot.message_handler(content_types=["text"])
