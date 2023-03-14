@@ -131,8 +131,8 @@ def download_and_send(url: str, message: telebot.types.Message):
 def video_message(message):
     logs(message, 1, f"User {message.chat.id} start function selection video message id {message.message_id}")
     try:
-        input_path = f"tmp/{message.chat.id}.mp4"
-        output_path = f"tmp/output_{message.chat.id}.mp4"
+        input_path = f"tmp/{message.chat.id}_{message.message_id}.mp4"
+        output_path = f"tmp/output_{message.chat.id}_{message.message_id}.mp4"
         raw = message.video.file_id
         file_info = bot.get_file(raw)
         video = bot.download_file(file_info.file_path)
