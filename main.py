@@ -2,8 +2,8 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.fx.all import crop
 from tiktok_module import downloader
 from dotenv import load_dotenv
-from telebot import types
 from colorama import Fore
+from enum import Enum
 from io import BytesIO
 from PIL import Image
 import audioread
@@ -24,17 +24,20 @@ logging.basicConfig(level=logging.DEBUG, filename="logs.log", filemode="w",
 bot = telebot.TeleBot(os.getenv("TOKEN"))
 
 
-def logs(message: telebot.types.Message, level: int, log_mes: str, error: Exception = None):
+class logs_level(Enum):
+    DEBUG = 0
+    INFO = 1
+    WARNING = 2
+    ERROR = 3
+    CRITICAL = 4
+
+
+def logs(message: telebot.types.Message, level: logs_level, log_mes: str, error: Exception = None):
     """
     This function sends to the console and saves to a log file.
 
     :param message: telebot.types.Message
-    :param level: Logging levels
-            0 - DEBUG
-            1 - INFO
-            2 - WARNING
-            3 - ERROR
-            4 - CRITICAL
+    :param level: logs_level
     :param log_mes: message log
     :param error: error message
 
@@ -46,21 +49,21 @@ def logs(message: telebot.types.Message, level: int, log_mes: str, error: Except
         logging.info(f"New user {message.chat.id}")
         print(Fore.GREEN + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] INFO New user {message.chat.id}")
 
-    if level == 0:
+    if level == logs_level.DEBUG:
         logging.debug(log_mes)
-        print(Fore.BLUE + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] DEBUG {log_mes}",error)
-    elif level == 1:
+        print(Fore.BLUE + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] DEBUG {log_mes}", error)
+    elif level == logs_level.INFO:
         logging.info(log_mes)
-        print(Fore.GREEN + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] INFO {log_mes}",error)
-    elif level == 2:
+        print(Fore.GREEN + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] INFO {log_mes}", error)
+    elif level == logs_level.WARNING:
         logging.debug(log_mes)
-        print(Fore.YELLOW + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] WARNING {log_mes}",error)
-    elif level == 3:
+        print(Fore.YELLOW + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] WARNING {log_mes}", error)
+    elif level == logs_level.ERROR:
         logging.error(log_mes, exc_info=error)
-        print(Fore.RED + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ERROR {log_mes}",error)
-    elif level == 4:
+        print(Fore.RED + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ERROR {log_mes}", error)
+    elif level == logs_level.CRITICAL:
         logging.critical(log_mes)
-        print(Fore.RED + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] CRITICAL {log_mes}",error)
+        print(Fore.RED + f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] CRITICAL {log_mes}", error)
 
 
 def get(videoid: str):
@@ -98,7 +101,7 @@ def download_and_send(url: str, message: telebot.types.Message):
     :return:Sending status True/False
     """
     song = get(pytube.extract.video_id(url))
-    logs(message, 1, f"User {message.chat.id} start download song Youtube music {song['trackUrl']}")
+    logs(message, logs_level.INFO, f"User {message.chat.id} start download song Youtube music {song['trackUrl']}")
     chat_id = message.chat.id
     try:
         destination = "tmp"
@@ -125,11 +128,13 @@ def download_and_send(url: str, message: telebot.types.Message):
         return True
     except Exception as e:
         bot.send_message(chat_id, (song['trackName'] + " has not been successfully downloaded."))
-        logs(message, 3, f"User {message.chat.id} error download song Youtube music url:{song['trackUrl']}", e)
+        logs(message, logs_level.WARNING, f"User {message.chat.id} error download song Youtube music url:{song['trackUrl']}", e)
         return False
+
+
 @bot.message_handler(content_types=["video"])
 def video_message(message):
-    logs(message, 1, f"User {message.chat.id} start function selection video message id {message.message_id}")
+    logs(message, logs_level.INFO, f"User {message.chat.id} start function selection video message id {message.message_id}")
     try:
         input_path = f"tmp/{message.chat.id}_{message.message_id}.mp4"
         output_path = f"tmp/output_{message.chat.id}_{message.message_id}.mp4"
@@ -144,51 +149,50 @@ def video_message(message):
         new_size = min(width, height)
         cropped_video = crop(video, width=new_size, height=new_size, x_center=width / 2, y_center=height / 2)
         cropped_video.write_videofile(output_path, logger=None)
-        bot.send_video_note(message.chat.id, open(output_path,"rb"))
+        bot.send_video_note(message.chat.id, open(output_path, "rb"))
         os.remove(output_path)
         os.remove(input_path)
     except Exception as e:
-        logs(message, 3, f"User {message.chat.id} error function selection video  message id {message.message_id}", e)
+        logs(message, logs_level.WARNING, f"User {message.chat.id} error function selection video  message id {message.message_id}", e)
+
 
 @bot.message_handler(content_types=["audio"])
 def audio_message(message):
-    logs(message, 1, f"User {message.chat.id} start convert audio to voice message id {message.message_id}")
+    logs(message, logs_level.INFO, f"User {message.chat.id} start convert audio to voice message id {message.message_id}")
     try:
         raw = message.audio.file_id
         file_info = bot.get_file(raw)
         audio = bot.download_file(file_info.file_path)
         bot.send_voice(message.chat.id, audio)
     except Exception as e:
-        logs(message, 3, f"User {message.chat.id} error convert audio to voice message id {message.message_id}", e)
-
-
+        logs(message, logs_level.WARNING, f"User {message.chat.id} error convert audio to voice message id {message.message_id}", e)
 
 
 @bot.message_handler(content_types=["text"])
 def text(message):
     mess = message.text
     if mess.startswith("https://vm.tiktok.com/"):
-        logs(message, 1, f"User {message.chat.id} start download tiktok {mess}")
+        logs(message, logs_level.INFO, f"User {message.chat.id} start download tiktok {mess}")
         try:
             dl = downloader.tiktok_downloader()
             content = dl.content(url=mess)
             if content == "private/remove":
-                logs(message, 2, f"User {message.chat.id} tried to download a private or deleted video url: {mess}")
+                logs(message, logs_level.WARNING, f"User {message.chat.id} tried to download a private or deleted video url: {mess}")
                 bot.send_message(message.chat.id, "This video is private or remove")
             elif content == "url-invalid":
-                logs(message, 2, f"User {message.chat.id}  entered an invalid url: {mess}")
+                logs(message, logs_level.WARNING, f"User {message.chat.id}  entered an invalid url: {mess}")
                 bot.send_message(message.chat.id, "This video is private or remove")
             else:
-                logs(message, 1, f"User {message.chat.id}  finished uploading the video url: {mess}")
+                logs(message, logs_level.INFO, f"User {message.chat.id}  finished uploading the video url: {mess}")
                 bot.send_video(message.chat.id, content)
         except Exception as e:
-            logs(message, 3, f"User {message.chat.id} error download tiktok", e)
+            logs(message, logs_level.WARNING, f"User {message.chat.id} error download tiktok", e)
     elif mess.startswith("https://music.youtube.com/watch?v="):
         bot.send_message(message.chat.id, "Start download")
         download_and_send(mess, message)
     elif mess.startswith("https://music.youtube.com/playlist?list="):
 
-        logs(message, 1, f"User {message.chat.id} start download playlist Youtube music {mess}")
+        logs(message, logs_level.INFO, f"User {message.chat.id} start download playlist Youtube music {mess}")
         try:
             bot.send_message(message.chat.id, f"Start download playlist {mess}")
             Error_msg = ""
@@ -203,10 +207,10 @@ def text(message):
             bot.send_message(message.chat.id, f"End download playlist {mess}")
         except Exception as e:
 
-            logs(message, 3, f"User {message.chat.id} error download playlist Youtube music url:{mess}", e)
+            logs(message, logs_level.WARNING, f"User {message.chat.id} error download playlist Youtube music url:{mess}", e)
     else:
 
-        logs(message, 1, f"User {message.chat.id} send message {mess}")
+        logs(message, logs_level.INFO, f"User {message.chat.id} send message {mess}")
 
 
 if __name__ == '__main__':
