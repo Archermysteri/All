@@ -171,7 +171,7 @@ def audio_message(message):
 @bot.message_handler(content_types=["text"])
 def text(message):
     mess = message.text
-    if mess.startswith("https://vm.tiktok.com/"):
+    if mess.startswith("https://vm.tiktok.com/") or mess.startswith("https://www.tiktok.com/"):
         logs(message, logs_level.INFO, f"User {message.chat.id} start download tiktok {mess}")
         try:
             dl = downloader.tiktok_downloader()
