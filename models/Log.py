@@ -17,36 +17,41 @@ class Loglevel(Enum):
     CRITICAL = 4
 
 
-def send(message: telebot.types.Message, level: Loglevel, log_mes: str, error: Exception = None):
-    """
-    This function sends to the console and saves to a log file.
+class log():
+    def __init__(self):
+        pass
 
-    :param message: telebot.types.Message
-    :param level: Loglevel
-    :param log_mes: message log
-    :param error: error message
+    @staticmethod
+    def send(message: telebot.types.Message, level: Loglevel, log_mes: str, error: Exception = None):
+        """
+        This function sends to the console and saves to a log file.
 
-    :return: None
-    """
-    global users
-    time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    if not message.chat.id in users:
-        users.append(message.chat.id)
-        logging.info(f"New user {message.chat.id}")
-        print(Fore.GREEN + f"[{time}] INFO New user {message.chat.id}")
+        :param message: telebot.types.Message
+        :param level: Loglevel
+        :param log_mes: message log
+        :param error: error message
 
-    if level == Loglevel.DEBUG:
-        logging.debug(log_mes)
-        print(Fore.BLUE + f"[{time}] DEBUG {log_mes}", error)
-    elif level == Loglevel.INFO:
-        logging.info(log_mes)
-        print(Fore.GREEN + f"[{time}] INFO {log_mes}", error)
-    elif level == Loglevel.WARNING:
-        logging.debug(log_mes)
-        print(Fore.YELLOW + f"[{time}] WARNING {log_mes}", error)
-    elif level == Loglevel.ERROR:
-        logging.error(log_mes, exc_info=error)
-        print(Fore.RED + f"[{time}] ERROR {log_mes}", error)
-    elif level == Loglevel.CRITICAL:
-        logging.critical(log_mes)
-        print(Fore.RED + f"[{time}] CRITICAL {log_mes}", error)
+        :return: None
+        """
+        global users
+        time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if not message.chat.id in users:
+            users.append(message.chat.id)
+            logging.info(f"New user {message.chat.id}")
+            print(Fore.GREEN + f"[{time}] INFO New user {message.chat.id}")
+
+        if level == Loglevel.DEBUG:
+            logging.debug(log_mes)
+            print(Fore.BLUE + f"[{time}] DEBUG {log_mes}", error)
+        elif level == Loglevel.INFO:
+            logging.info(log_mes)
+            print(Fore.GREEN + f"[{time}] INFO {log_mes}", error)
+        elif level == Loglevel.WARNING:
+            logging.debug(log_mes)
+            print(Fore.YELLOW + f"[{time}] WARNING {log_mes}", error)
+        elif level == Loglevel.ERROR:
+            logging.error(log_mes, exc_info=error)
+            print(Fore.RED + f"[{time}] ERROR {log_mes}", error)
+        elif level == Loglevel.CRITICAL:
+            logging.critical(log_mes)
+            print(Fore.RED + f"[{time}] CRITICAL {log_mes}", error)

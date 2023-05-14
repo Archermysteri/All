@@ -64,11 +64,11 @@ def send_photos_or_video(url: str, message: telebot.types.Message, bot: telebot.
     post_url = server_url + "id/download"
     req_post = ses.post(post_url, data=data, allow_redirects=True)
     if req_post.status_code == 302 or 'This video is currently not available' in req_post.text or 'Video is private or removed!' in req_post.text or 'Video bersifat pribadi atau dihapus!' in req_post.text:
-        Log.send(message, Log.Loglevel.WARNING,
+        Log.log.send(message, Log.Loglevel.WARNING,
                  f"User {message.chat.id} tried to download a private or deleted video url: {url}")
         bot.send_message(message.chat.id, "This video is private or remove")
     elif 'Submitted Url is Invalid, Try Again' in req_post.text or 'TikTok mengembalikan halaman utama!' in req_post.text:
-        Log.send(message, Log.Loglevel.WARNING,
+        Log.log.send(message, Log.Loglevel.WARNING,
                  f"User {message.chat.id} tried to download a invalid link video url: {url}")
         bot.send_message(message.chat.id, "invalid link")
     html = bs4.BeautifulSoup(req_post.text, 'html.parser')
@@ -77,11 +77,11 @@ def send_photos_or_video(url: str, message: telebot.types.Message, bot: telebot.
             'a', attrs={'target': '_blank'})[0].get('href')
         get_content = requests.get(download_link).content
         bot.send_video(message.chat.id, get_content)
-        Log.send(message, Log.Loglevel.INFO, f"User {message.chat.id}  finished uploading the video url: {url}")
+        Log.log.send(message, Log.Loglevel.INFO, f"User {message.chat.id}  finished uploading the video url: {url}")
         return
     for i in html.findAll('div', attrs={'class': 'col s12 m3'}):
         download_link = i.find(
             'a', attrs={'class': 'btn waves-effect waves-light orange'}).get('href')
         bot.send_photo(message.chat.id, requests.get(download_link).content)
     bot.send_message(message.chat.id, "End")
-    Log.send(message, Log.Loglevel.INFO, f"User {message.chat.id}  finished uploading the photos url: {url}")
+    Log.log.send(message, Log.Loglevel.INFO, f"User {message.chat.id}  finished uploading the photos url: {url}")
