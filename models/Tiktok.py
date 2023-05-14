@@ -65,11 +65,11 @@ def send_photos_or_video(url: str, message: telebot.types.Message, bot: telebot.
     req_post = ses.post(post_url, data=data, allow_redirects=True)
     if req_post.status_code == 302 or 'This video is currently not available' in req_post.text or 'Video is private or removed!' in req_post.text or 'Video bersifat pribadi atau dihapus!' in req_post.text:
         Log.log.send(message, Log.Loglevel.WARNING,
-                 f"User {message.chat.id} tried to download a private or deleted video url: {url}")
+                     f"User {message.chat.id} tried to download a private or deleted video url: {url}")
         bot.send_message(message.chat.id, "This video is private or remove")
     elif 'Submitted Url is Invalid, Try Again' in req_post.text or 'TikTok mengembalikan halaman utama!' in req_post.text:
         Log.log.send(message, Log.Loglevel.WARNING,
-                 f"User {message.chat.id} tried to download a invalid link video url: {url}")
+                     f"User {message.chat.id} tried to download a invalid link video url: {url}")
         bot.send_message(message.chat.id, "invalid link")
     html = bs4.BeautifulSoup(req_post.text, 'html.parser')
     if len(html.findAll('div', attrs={'class': 'col s12 m3'})) == 0:
