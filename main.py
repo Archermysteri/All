@@ -158,7 +158,6 @@ def text(message: telebot.types.Message):
     else:
 
         Log.log.send(message, Log.Loglevel.INFO, f"User {message.chat.id} send message {mess}")
-        bot.send_message(message.chat.id,mess)
 
 
 if __name__ == '__main__':
