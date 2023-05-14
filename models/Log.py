@@ -4,10 +4,10 @@ import datetime
 import telebot
 import logging
 
-
 logging.basicConfig(level=logging.DEBUG, filename="logs.log", filemode="w",
                     format='[%(asctime)s] %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-users=[]
+users = []
+
 
 class Loglevel(Enum):
     DEBUG = 0

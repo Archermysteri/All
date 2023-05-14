@@ -1,8 +1,7 @@
-import requests
-import bs4
-import telebot
-
 from models import Log
+import requests
+import telebot
+import bs4
 
 
 def send_photos_or_video(url: str, message: telebot.types.Message, bot: telebot.TeleBot):
@@ -86,4 +85,3 @@ def send_photos_or_video(url: str, message: telebot.types.Message, bot: telebot.
         bot.send_photo(message.chat.id, requests.get(download_link).content)
     bot.send_message(message.chat.id, "End")
     Log.send(message, Log.Loglevel.INFO, f"User {message.chat.id}  finished uploading the photos url: {url}")
-
