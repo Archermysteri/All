@@ -11,16 +11,9 @@ import telebot
 import pytube
 import os
 
-
 load_dotenv()
 
-
-
 bot = telebot.TeleBot(os.getenv("TOKEN"))
-
-
-
-
 
 
 def get(videoid: str):
@@ -85,13 +78,15 @@ def download_and_send(url: str, message: telebot.types.Message):
         return True
     except Exception as e:
         bot.send_message(chat_id, (song['trackName'] + " has not been successfully downloaded."))
-        Log.send(message, Log.Loglevel.WARNING, f"User {message.chat.id} error download song Youtube music url:{song['trackUrl']}", e)
+        Log.send(message, Log.Loglevel.WARNING,
+                 f"User {message.chat.id} error download song Youtube music url:{song['trackUrl']}", e)
         return False
 
 
 @bot.message_handler(content_types=["video"])
-def video_message(message:telebot.types.Message):
-    Log.send(message, Log.Loglevel.INFO, f"User {message.chat.id} start function selection video message id {message.message_id}")
+def video_message(message: telebot.types.Message):
+    Log.send(message, Log.Loglevel.INFO,
+             f"User {message.chat.id} start function selection video message id {message.message_id}")
     try:
         input_path = f"tmp/{message.chat.id}_{message.message_id}.mp4"
         output_path = f"tmp/output_{message.chat.id}_{message.message_id}.mp4"
@@ -110,28 +105,31 @@ def video_message(message:telebot.types.Message):
         os.remove(output_path)
         os.remove(input_path)
     except Exception as e:
-        Log.send(message, Log.Loglevel.WARNING, f"User {message.chat.id} error function selection video  message id {message.message_id}", e)
+        Log.send(message, Log.Loglevel.WARNING,
+                 f"User {message.chat.id} error function selection video  message id {message.message_id}", e)
 
 
 @bot.message_handler(content_types=["audio"])
-def audio_message(message:telebot.types.Message):
-    Log.send(message, Log.Loglevel.INFO, f"User {message.chat.id} start convert audio to voice message id {message.message_id}")
+def audio_message(message: telebot.types.Message):
+    Log.send(message, Log.Loglevel.INFO,
+             f"User {message.chat.id} start convert audio to voice message id {message.message_id}")
     try:
         raw = message.audio.file_id
         file_info = bot.get_file(raw)
         audio = bot.download_file(file_info.file_path)
         bot.send_voice(message.chat.id, audio)
     except Exception as e:
-        Log.send(message, Log.Loglevel.WARNING, f"User {message.chat.id} error convert audio to voice message id {message.message_id}", e)
+        Log.send(message, Log.Loglevel.WARNING,
+                 f"User {message.chat.id} error convert audio to voice message id {message.message_id}", e)
 
 
 @bot.message_handler(content_types=["text"])
-def text(message:telebot.types.Message):
+def text(message: telebot.types.Message):
     mess = message.text
     if mess.startswith("https://vm.tiktok.com/") or mess.startswith("https://www.tiktok.com/"):
         Log.send(message, Log.Loglevel.INFO, f"User {message.chat.id} start download tiktok {mess}")
         try:
-            Tiktok.send_photos_or_video(mess,message,bot)
+            Tiktok.send_photos_or_video(mess, message, bot)
         except Exception as e:
             Log.send(message, Log.Loglevel.WARNING, f"User {message.chat.id} error download tiktok", e)
     elif mess.startswith("https://music.youtube.com/watch?v="):
@@ -154,7 +152,8 @@ def text(message:telebot.types.Message):
             bot.send_message(message.chat.id, f"End download playlist {mess}")
         except Exception as e:
 
-            Log.send(message, Log.Loglevel.WARNING, f"User {message.chat.id} error download playlist Youtube music url:{mess}", e)
+            Log.send(message, Log.Loglevel.WARNING,
+                     f"User {message.chat.id} error download playlist Youtube music url:{mess}", e)
     else:
 
         Log.send(message, Log.Loglevel.INFO, f"User {message.chat.id} send message {mess}")
