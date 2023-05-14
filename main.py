@@ -1,6 +1,6 @@
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.fx.all import crop
-from tiktok_module import downloader
+from models import Tiktok
 from dotenv import load_dotenv
 from colorama import Fore
 from enum import Enum
@@ -175,8 +175,8 @@ def text(message):
     if mess.startswith("https://vm.tiktok.com/") or mess.startswith("https://www.tiktok.com/"):
         logs(message, Loglevel.INFO, f"User {message.chat.id} start download tiktok {mess}")
         try:
-            dl = downloader.tiktok_downloader()
-            content = dl.content(url=mess)
+            dl = Tiktok.download()
+            content = dl.content_photos_or_video(url=mess)
             if content == "private/remove":
                 logs(message, Loglevel.WARNING, f"User {message.chat.id} tried to download a private or deleted video url: {mess}")
                 bot.send_message(message.chat.id, "This video is private or remove")
@@ -184,8 +184,14 @@ def text(message):
                 logs(message, Loglevel.WARNING, f"User {message.chat.id}  entered an invalid url: {mess}")
                 bot.send_message(message.chat.id, "This video is private or remove")
             else:
-                logs(message, Loglevel.INFO, f"User {message.chat.id}  finished uploading the video url: {mess}")
-                bot.send_video(message.chat.id, content)
+                if type(content) == list:
+                    logs(message, Loglevel.INFO, f"User {message.chat.id}  finished uploading the photos url: {mess}")
+                    for url in content:
+                        bot.send_video(message.chat.id, requests.get(url).content)
+                    bot.send_message(message.chat.id,"End")
+                else:
+                    logs(message, Loglevel.INFO, f"User {message.chat.id}  finished uploading the video url: {mess}")
+                    bot.send_video(message.chat.id, content)
         except Exception as e:
             logs(message, Loglevel.WARNING, f"User {message.chat.id} error download tiktok", e)
     elif mess.startswith("https://music.youtube.com/watch?v="):
