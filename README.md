@@ -1,4 +1,3 @@
--
 # All_bot
 This Telegram bot is written in Python using pytelegrambotapi It is created to combine many functions in one bot
 
