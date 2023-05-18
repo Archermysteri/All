@@ -3,7 +3,7 @@ This Telegram bot is written in Python using pytelegrambotapi It is created to c
 
 Functions:
 1. Convert audio to voice messages
-3. Download video without watermark tik tok
+3. Download video or photo without watermark tik tok
 4. Download music YouTube music with media data
 5. Convert video to video note
 
