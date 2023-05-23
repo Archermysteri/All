@@ -86,6 +86,8 @@ def download_and_send(url: str, message: telebot.types.Message):
 
 @bot.message_handler(content_types=["video"])
 def video_message(message: telebot.types.Message):
+    if not os.path.exists("tmp"):
+        os.makedirs("tmp")
     Log.log.send(message, Log.Loglevel.INFO,
                  f"User {message.chat.id} start function selection video message id {message.message_id}")
     try:
