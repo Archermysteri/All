@@ -67,10 +67,12 @@ def send_photos_or_video(url: str, message: telebot.types.Message, bot: telebot.
         Log.log.send(message, Log.Loglevel.WARNING,
                      f"User {message.chat.id} tried to download a private or deleted video url: {url}")
         bot.send_message(message.chat.id, "This video is private or remove")
+        return
     elif 'Submitted Url is Invalid, Try Again' in req_post.text or 'TikTok mengembalikan halaman utama!' in req_post.text:
         Log.log.send(message, Log.Loglevel.WARNING,
                      f"User {message.chat.id} tried to download a invalid link video url: {url}")
         bot.send_message(message.chat.id, "invalid link")
+        return
     html = bs4.BeautifulSoup(req_post.text, 'html.parser')
     if len(html.findAll('div', attrs={'class': 'col s12 m3'})) == 0:
         download_link = html.findAll(
@@ -79,9 +81,18 @@ def send_photos_or_video(url: str, message: telebot.types.Message, bot: telebot.
         bot.send_video(message.chat.id, get_content)
         Log.log.send(message, Log.Loglevel.INFO, f"User {message.chat.id}  finished uploading the video url: {url}")
         return
+    msg = bot.send_message(message.chat.id, 'The download has started')
+    list_url = []
     for i in html.findAll('div', attrs={'class': 'col s12 m3'}):
         download_link = i.find(
             'a', attrs={'class': 'btn waves-effect waves-light orange'}).get('href')
-        bot.send_photo(message.chat.id, requests.get(download_link).content)
-    bot.send_message(message.chat.id, "End")
+        list_url.append(download_link)
+    list_media = []
+    for i in zip(list_url, range(1, len(list_url))):
+        bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id,
+                              text=f"The download has started {i[1]}/{len(list_url)}")
+        list_media.append(telebot.types.InputMedia(media=requests.get(i[0]).content, type='photo'))
+    bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id,
+                          text=f"Sending")
+    bot.send_media_group(message.chat.id,  media=list_media)
     Log.log.send(message, Log.Loglevel.INFO, f"User {message.chat.id}  finished uploading the photos url: {url}")
