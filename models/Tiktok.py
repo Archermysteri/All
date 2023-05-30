@@ -94,5 +94,6 @@ def send_photos_or_video(url: str, message: telebot.types.Message, bot: telebot.
         list_media.append(telebot.types.InputMedia(media=requests.get(i[0]).content, type='photo'))
     bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id,
                           text=f"Sending")
-    bot.send_media_group(message.chat.id,  media=list_media)
+    for i in range(0, len(list_media), 10):
+        bot.send_media_group(message.chat.id,  media= list_media[i:i + 10])
     Log.log.send(message, Log.Loglevel.INFO, f"User {message.chat.id}  finished uploading the photos url: {url}")
