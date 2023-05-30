@@ -88,7 +88,7 @@ def send_photos_or_video(url: str, message: telebot.types.Message, bot: telebot.
             'a', attrs={'class': 'btn waves-effect waves-light orange'}).get('href')
         list_url.append(download_link)
     list_media = []
-    for i in zip(list_url, range(1, len(list_url))):
+    for i in zip(list_url, range(1, len(list_url)+1)):
         bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id,
                               text=f"The download has started {i[1]}/{len(list_url)}")
         list_media.append(telebot.types.InputMedia(media=requests.get(i[0]).content, type='photo'))
